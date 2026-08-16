@@ -17,7 +17,7 @@ public class Tela extends JFrame implements ActionListener {
     int [][] cores = {{244, 29, 21},{252, 243, 0},{0, 175, 84},{63, 142, 252}};
     int[] quantidade = {0,0,0,0,0,200};
     int escolha=0,operacao=0,descontos=0;
-    double preco=0.00, valorCadeira=50.00;
+    double  valorCadeira=50.00;
     Tela(){
 
 
@@ -45,7 +45,7 @@ public class Tela extends JFrame implements ActionListener {
         quant.setVerticalAlignment(SwingConstants.CENTER);
         quant.setFont(new Font("Arial",Font.BOLD,20));
 
-        laValor = new JLabel("R$ "+String.valueOf( preco));
+        laValor = new JLabel("R$ "+String.valueOf( 0.00));
         laValor.setHorizontalAlignment(SwingConstants.CENTER);
         laValor.setVerticalAlignment(SwingConstants.CENTER);
         laValor.setFont(new Font("Arial",Font.BOLD,20));
@@ -73,7 +73,7 @@ public class Tela extends JFrame implements ActionListener {
         opcao.add(reset);
 
         radios = new JPanel();
-        radios.setLayout(new GridLayout(3,1));
+        radios.setLayout(new GridLayout(2,2));
         radios.setBackground(new Color(255, 255, 255));
         radios.add(re);
         radios.add(ocup);
@@ -130,6 +130,11 @@ public class Tela extends JFrame implements ActionListener {
             }
         }
 
+        cadeiras[0][0].setText("*");
+        cadeiras[0][0].setFont(new Font("Arial",Font.BOLD,13));
+        cadeiras[0][0].setEnabled(true);
+        cadeiras[0][0].tipo=99;
+
 
         header = new JPanel();
         header.setLayout(new GridLayout(1,3));
@@ -139,17 +144,55 @@ public class Tela extends JFrame implements ActionListener {
         }
 
         this.setSize(1250,850);
-        this.setVisible(true);
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.add(body,BorderLayout.CENTER);
         this.add(header,BorderLayout.NORTH);
         this.add(sideBar,BorderLayout.EAST);
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (e.getSource()==cadeiras[0][0]){
+            JPanel panel = new JPanel();
+            panel.setLayout(new GridLayout(6,1));
+            JLabel[] labels = new JLabel[6];
+            for (int i = 0; i < labels.length; i++) {
+                labels[i]=new JLabel();
 
+                switch (i){
+                    case 0:
+                        labels[i].setText("Assentos livres: "+quantidade[5]);
+                        break;
+                    case 1:
+                        labels[i].setText("Assentos reservados: "+quantidade[4]);
+                        break;
+                    case 2:
+                        labels[i].setText("Assentos vendidos: "+quantidade[3]);
+                        break;
+                    case 3:
+                        labels[i].setText("Total das reservas: R$"+quantidade[4]*valorCadeira*0.4);
+                        break;
+                    case 4:
+                        labels[i].setText("Total das vendas: R$"+quantidade[3]*valorCadeira);
+                        break;
+                    case 5:
+                        labels[i].setText("Arrecadação total: R$"+((quantidade[4]*valorCadeira)+(quantidade[3]*valorCadeira)));
+                        break;
+                }
+                panel.add(labels[i]);
+            }
+            JFrame rela = new JFrame();
+            rela.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            rela.setResizable(false);
+            rela.setLocationRelativeTo(null);
+            rela.add(panel);
+            rela.setSize(300,300);
+            rela.setVisible(true);
+            return;
+        }
         for (int i = 0; i < cadeiras.length; i++) {
             for (int j = 0; j < cadeiras[i].length; j++) {
                 if(e.getSource()== cadeiras[i][j]){
@@ -184,13 +227,14 @@ public class Tela extends JFrame implements ActionListener {
             }}
         if (e.getSource()==re){
             operacao=1;
+            descontos=0;
             for (int l = 0; l < cadeiras.length; l++) {
                 for (int k = 0; k < cadeiras[l].length; k++) {
                     if (cadeiras[l][k].tipo==4){
                         escolha-=1;
                         cadeiras[l][k].setBackground(new Color(cores[1][0],cores[1][1],cores[1][2]));
                         cadeiras[l][k].tipo=3;
-                        descontos+=1;
+                        System.out.println(l+" "+k+" "+cadeiras[l][k].tipo);
                     }
                 }
             }
@@ -199,6 +243,7 @@ public class Tela extends JFrame implements ActionListener {
             }
         if (e.getSource()==ocup){
             operacao=2;
+            descontos=0;
             for (int l = 0; l < cadeiras.length; l++) {
                 for (int k = 0; k < cadeiras[l].length; k++) {
                     if (cadeiras[l][k].tipo==4){
@@ -241,12 +286,17 @@ public class Tela extends JFrame implements ActionListener {
                             if (cadeiras[l][k].tipo==4){
                                 escolha-=1;
                                 cadeiras[l][k].setBackground(new Color(cores[1][0],cores[1][1],cores[1][2]));
-                                cadeiras[l][k].tipo=0;
+                                cadeiras[l][k].tipo=3;
                             }
                             else if(cadeiras[l][k].tipo==1){
                                 escolha-=1;
                                 cadeiras[l][k].setBackground(new Color(cores[1][0],cores[1][1],cores[1][2]));
-                                cadeiras[l][k].tipo=0;
+                                cadeiras[l][k].tipo=3;
+                                quantidade[4]+=1;
+                                quantidade[5]-=1;
+                                for(int i = 3; i<6;i++){
+                                    legenda[i].setText(String.valueOf(quantidade[i]));
+                                }
                             }
 
                         }
@@ -259,11 +309,19 @@ public class Tela extends JFrame implements ActionListener {
                                 escolha-=1;
                                 cadeiras[l][k].setBackground(new Color(cores[2][0],cores[2][1],cores[2][2]));
                                 cadeiras[l][k].tipo=0;
+                                quantidade[4]-=1;
+                                quantidade[5]+=1;
+                                for(int i = 3; i<6;i++){
+                                    legenda[i].setText(String.valueOf(quantidade[i]));
+                                }
                             }
                             else if(cadeiras[l][k].tipo==1){
                                 escolha-=1;
                                 cadeiras[l][k].setBackground(new Color(cores[2][0],cores[2][1],cores[2][2]));
                                 cadeiras[l][k].tipo=0;
+                                for(int i = 3; i<6;i++){
+                                    legenda[i].setText(String.valueOf(quantidade[i]));
+                                }
                             }
                         }
                     }
@@ -275,11 +333,21 @@ public class Tela extends JFrame implements ActionListener {
                                 escolha-=1;
                                 cadeiras[l][k].setBackground(new Color(cores[0][0],cores[0][1],cores[0][2]));
                                 cadeiras[l][k].tipo=2;
+                                quantidade[3]+=1;
+                                quantidade[4]-=1;
+                                for(int i = 3; i<6;i++){
+                                    legenda[i].setText(String.valueOf(quantidade[i]));
+                                }
                             }
                             else if(cadeiras[l][k].tipo==1){
                                 escolha-=1;
                                 cadeiras[l][k].setBackground(new Color(cores[0][0],cores[0][1],cores[0][2]));
                                 cadeiras[l][k].tipo=2;
+                                quantidade[3]+=1;
+                                quantidade[5]-=1;
+                                for(int i = 3; i<6;i++){
+                                    legenda[i].setText(String.valueOf(quantidade[i]));
+                                }
                             }
 
                         }
@@ -293,14 +361,13 @@ public class Tela extends JFrame implements ActionListener {
 
             laValor.setText("R$ "+0.0);
             quant.setText(String.valueOf(escolha));
-            preco=0;
             operacao=0;
 
         }
         }
     public double calc (double valorCadeira, int quantidade,int desconto){
         double finalPreco;
-        finalPreco= (valorCadeira*quantidade)-((valorCadeira*desconto)*0.4);
+        finalPreco= (valorCadeira*quantidade)-(valorCadeira*desconto*0.4);
         return finalPreco;
     }
 }
